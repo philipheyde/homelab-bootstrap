@@ -7,7 +7,7 @@ readonly DEFAULT_BRANCH="main"
 readonly DEFAULT_BOOTSTRAP_REPOSITORY="philipheyde/homelab-bootstrap"
 
 log() {
-    printf '[%s] %s\n' "$SCRIPT_NAME" "$*"
+    printf '[%s] %s\n' "$SCRIPT_NAME" "$*" >&2
 }
 
 error() {
@@ -82,7 +82,7 @@ main() {
 
     bootstrap_script="$(download_bootstrap)"
 
-    trap 'rm -f "$bootstrap_script"' EXIT
+    trap "rm -f '$bootstrap_script'" EXIT
 
     log "Starter VM-bootstrap..."
 
