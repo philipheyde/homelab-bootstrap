@@ -1,40 +1,65 @@
 # Homelab Bootstrap
 
-Public phase-0 bootstrap tooling for Debian-based homelab virtual machines.
+Public phase-0 provisioning tools for Debian-based homelab virtual machines.
 
-The bootstrap script:
+This repository contains no secrets or host-specific credentials.
 
-- validates the operating system and required variables
-- installs the base packages needed for provisioning
-- validates SSH access to the private configuration repository
-- clones the private homelab repository
-- installs Git synchronization tooling
-- generates the initial host inventory
+## Components
 
-## Security model
+- `bootstrap.sh`: phase-0 entry point that downloads and runs the full bootstrap
+- `bootstrap-vm.sh`: provisions the VM and clones the private configuration repository
 
-This repository contains no secrets.
+## Requirements
 
-SSH deploy keys, private repository URLs and host-specific configuration are
-provided locally when provisioning a machine.
-
-## Usage
-
-Download the script before executing it:
+A clean Debian installation may not include `curl`. Install the minimal download
+dependencies first:
 
 ```bash
-curl -fsSLo /tmp/bootstrap-vm.sh \
-  https://raw.githubusercontent.com/philipheyde/homelab-bootstrap/main/bootstrap-vm.sh
+sudo apt-get update
+sudo apt-get install -y curl ca-certificates
+```
 
-less /tmp/bootstrap-vm.sh
+## Download
 
-chmod 755 /tmp/bootstrap-vm.sh
+Download the phase-0 script before executing it:
 
+```bash
+curl -fsSL \
+  https://raw.githubusercontent.com/philipheyde/homelab-bootstrap/main/bootstrap.sh \
+  -o /tmp/homelab-bootstrap.sh
+
+bash -n /tmp/homelab-bootstrap.sh
+less /tmp/homelab-bootstrap.sh
+chmod 755 /tmp/homelab-bootstrap.sh
+```
+
+## Run
+
+The SSH deploy key and matching SSH host alias must already be configured for
+the private `homelab-config` repository.
+
+```bash
 sudo \
-  GIT_REMOTE="git@SSH_HOST_ALIAS:philipheyde/homelab-config.git" \
-  SYNC_USER="LOCAL_USER" \
-  SSH_HOST_ALIAS="SSH_HOST_ALIAS" \
-  /tmp/bootstrap-vm.sh
+  GIT_REMOTE="git@github-homelab-example:philipheyde/homelab-config.git" \
+  SYNC_USER="local-user" \
+  SSH_HOST_ALIAS="github-homelab-example" \
+  /tmp/homelab-bootstrap.sh
+```
 
-For stable or disaster-recovery usage, download a tagged release rather than
-the moving main branch.
+## Version pinning
+
+`bootstrap.sh` downloads `bootstrap-vm.sh` from the `main` branch by default.
+
+A tag or commit can be selected with `BOOTSTRAP_REF`:
+
+```bash
+sudo \
+  BOOTSTRAP_REF="v1.0.0" \
+  GIT_REMOTE="git@github-homelab-example:philipheyde/homelab-config.git" \
+  SYNC_USER="local-user" \
+  SSH_HOST_ALIAS="github-homelab-example" \
+  /tmp/homelab-bootstrap.sh
+```
+
+For disaster recovery, use a tested release tag rather than the moving
+`main` branch.
